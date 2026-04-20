@@ -1,4 +1,5 @@
 import socket
+import datetime
 
 HOST = ''  # Listen on all interfaces
 PORT = 8080
@@ -17,9 +18,21 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             print("Request:")
             print(request.decode(errors='ignore'))
 
-            # Basic routing
-            if b"/health" in request:
+            # Parse request line
+            request_line = request.split(b"\r\n")[0]
+            print("Request line:", request_line)
+
+            # Extract path
+            try:
+                path = request_line.split(b" ")[1]
+            except IndexError:
+                path = b"/"
+
+            # Routing
+            if path == b"/health":
                 response_body = b"OK"
+            elif path == b"/time":
+                response_body = str(datetime.datetime.now()).encode()
             else:
                 response_body = b"Hello, World!"
 
